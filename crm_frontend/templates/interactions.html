@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactions - CRM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Interactions</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+    <div class="container">
+        <h2>Interactions List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer ID</th>
+                    <th>Worker ID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="interactions-table">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+
+        <h3>Add New Interaction</h3>
+        <form id="interaction-form">
+            <input type="number" id="customer_id" placeholder="Customer ID" required>
+            <input type="number" id="worker_id" placeholder="Worker ID">
+            <input type="text" id="interaction_type" placeholder="Interaction Type" required>
+            <input type="datetime-local" id="interaction_date" required>
+            <textarea id="interaction_notes" placeholder="Notes"></textarea>
+            <button type="submit">Add Interaction</button>
+        </form>
+    </div>
+    <script>
+        fetchData('/interactions', 'interactions-table');
+
+        // Add event listener for the form
+        document.getElementById('interaction-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            addInteraction();
+        });
+
+        function addInteraction() {
+            const data = {
+                customer_id: document.getElementById('customer_id').value,
+                worker_id: document.getElementById('worker_id').value,
+                interaction_type: document.getElementById('interaction_type').value,
+                interaction_date: document.getElementById('interaction_date').value,
+                interaction_notes: document.getElementById('interaction_notes').value
+            };
+
+            fetch('/interactions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Interaction added successfully!');
+                fetchData('/interactions', 'interactions-table'); // Refresh the table
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

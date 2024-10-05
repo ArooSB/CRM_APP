@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Tickets - CRM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Support Tickets</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+    <div class="container">
+        <h2>Support Tickets List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer ID</th>
+                    <th>Created By</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="support-tickets-table">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+
+        <h3>Add New Support Ticket</h3>
+        <form id="support-ticket-form">
+            <input type="number" id="customer_id" placeholder="Customer ID" required>
+            <input type="number" id="created_by" placeholder="Created By Worker ID">
+            <input type="number" id="assigned_to" placeholder="Assigned To Worker ID">
+            <input type="text" id="ticket_subject" placeholder="Subject" required>
+            <textarea id="ticket_description" placeholder="Description" required></textarea>
+            <input type="text" id="ticket_status" placeholder="Status" required>
+            <button type="submit">Add Support Ticket</button>
+        </form>
+    </div>
+    <script>
+        fetchData('/support_tickets', 'support-tickets-table');
+
+        // Add event listener for the form
+        document.getElementById('support-ticket-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            addSupportTicket();
+        });
+
+        function addSupportTicket() {
+            const data = {
+                customer_id: document.getElementById('customer_id').value,
+                created_by: document.getElementById('created_by').value,
+                assigned_to: document.getElementById('assigned_to').value,
+                ticket_subject: document.getElementById('ticket_subject').value,
+                ticket_description: document.getElementById('ticket_description').value,
+                ticket_status: document.getElementById('ticket_status').value
+            };
+
+            fetch('/support_tickets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Support ticket added successfully!');
+                fetchData('/support_tickets', 'support-tickets-table'); // Refresh the table
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>
