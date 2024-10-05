@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Leads - CRM</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sales Leads</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+    <div class="container">
+        <h2>Sales Leads List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer ID</th>
+                    <th>Worker ID</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="sales-leads-table">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+
+        <h3>Add New Sales Lead</h3>
+        <form id="sales-lead-form">
+            <input type="number" id="customer_id" placeholder="Customer ID" required>
+            <input type="number" id="worker_id" placeholder="Worker ID">
+            <input type="text" id="lead_status" placeholder="Lead Status" required>
+            <input type="text" id="lead_source" placeholder="Lead Source">
+            <input type="number" id="potential_value" placeholder="Potential Value">
+            <button type="submit">Add Sales Lead</button>
+        </form>
+    </div>
+    <script>
+        fetchData('/sales_leads', 'sales-leads-table');
+
+        // Add event listener for the form
+        document.getElementById('sales-lead-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            addSalesLead();
+        });
+
+        function addSalesLead() {
+            const data = {
+                customer_id: document.getElementById('customer_id').value,
+                worker_id: document.getElementById('worker_id').value,
+                lead_status: document.getElementById('lead_status').value,
+                lead_source: document.getElementById('lead_source').value,
+                potential_value: document.getElementById('potential_value').value
+            };
+
+            fetch('/sales_leads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Sales lead added successfully!');
+                fetchData('/sales_leads', 'sales-leads-table'); // Refresh the table
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>
