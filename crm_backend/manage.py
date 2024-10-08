@@ -1,4 +1,3 @@
-import click
 from crm_backend import app, db
 from crm_backend.models import Worker
 

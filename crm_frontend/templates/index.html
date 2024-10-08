@@ -22,6 +22,29 @@
             <input type="submit" value="Login">
         </form>
     </div>
+    <script>
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userName', data.username);
+                window.location.href = '/welcome';
+            } else {
+                alert('Login failed! Please check your credentials.');
+            }
+        }
+    </script>
     <script src="/js/scripts.js"></script>
 </body>
 </html>

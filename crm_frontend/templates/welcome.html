@@ -25,7 +25,8 @@
     <script>
         function logout() {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            localStorage.removeItem('userName'); // Clear the username from local storage
+            window.location.href = '/'; // Redirect to the login page
         }
 
         document.addEventListener('DOMContentLoaded', () => {

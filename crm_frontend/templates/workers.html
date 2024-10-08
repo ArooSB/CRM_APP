@@ -13,12 +13,15 @@
     </header>
     <div class="container">
         <h2>Workers List</h2>
+        <button onclick="openAddWorkerModal()">Add Worker</button>
         <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Action</th>
+                    <th>Email</th>
+                    <th>Position</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="workers-table">
@@ -26,8 +29,103 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Add/Edit Worker Modal -->
+    <div id="workerModal" style="display:none;">
+        <h3 id="modalTitle">Add Worker</h3>
+        <form id="workerForm">
+            <label for="workerName">Name:</label>
+            <input type="text" id="workerName" required>
+            <label for="workerEmail">Email:</label>
+            <input type="email" id="workerEmail" required>
+            <label for="workerPosition">Position:</label>
+            <input type="text" id="workerPosition" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
     <script>
-        fetchData('/workers', 'workers-table');
+        // Fetch worker data and populate the table
+        async function fetchData(url, tableId) {
+            const response = await fetch(url);
+            const workers = await response.json();
+            const tableBody = document.getElementById(tableId);
+            tableBody.innerHTML = '';
+
+            workers.forEach(worker => {
+                const row = `
+                    <tr>
+                        <td>${worker.id}</td>
+                        <td>${worker.name}</td>
+                        <td>${worker.email}</td>
+                        <td>${worker.position}</td>
+                        <td>
+                            <button onclick="editWorker(${worker.id})">Edit</button>
+                            <button onclick="deleteWorker(${worker.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Open modal to add or edit worker
+        function openAddWorkerModal() {
+            document.getElementById('modalTitle').innerText = 'Add Worker';
+            document.getElementById('workerModal').style.display = 'block';
+        }
+
+        function editWorker(workerId) {
+            // Fetch worker details and populate modal form for editing
+            document.getElementById('modalTitle').innerText = 'Edit Worker';
+            document.getElementById('workerModal').style.display = 'block';
+
+            // Fetch existing worker details by ID
+            fetch(`/workers/${workerId}`)
+                .then(response => response.json())
+                .then(worker => {
+                    document.getElementById('workerName').value = worker.name;
+                    document.getElementById('workerEmail').value = worker.email;
+                    document.getElementById('workerPosition').value = worker.position;
+                });
+        }
+
+        function deleteWorker(workerId) {
+            // Send DELETE request to remove worker
+            fetch(`/workers/${workerId}`, { method: 'DELETE' })
+                .then(() => {
+                    fetchData('/workers', 'workers-table');
+                });
+        }
+
+        // Submit form to add or edit worker
+        document.getElementById('workerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const name = document.getElementById('workerName').value;
+            const email = document.getElementById('workerEmail').value;
+            const position = document.getElementById('workerPosition').value;
+
+            const method = document.getElementById('modalTitle').innerText === 'Add Worker' ? 'POST' : 'PUT';
+            const workerId = document.getElementById('modalTitle').innerText === 'Edit Worker' ? workerId : null;
+
+            const workerData = { name, email, position };
+
+            await fetch(`/workers${workerId ? `/${workerId}` : ''}`, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(workerData),
+            });
+
+            fetchData('/workers', 'workers-table');
+            document.getElementById('workerModal').style.display = 'none';
+        });
+
+        // Load workers when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData('/workers', 'workers-table');
+        });
     </script>
     <script src="/js/scripts.js"></script>
 </body>
