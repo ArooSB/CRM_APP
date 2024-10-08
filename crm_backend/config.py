@@ -9,7 +9,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT configuration
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'your-default-secret-key')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'my-secret-key')
 
     # General application settings
     DEBUG = os.getenv('DEBUG', 'False') == 'True'

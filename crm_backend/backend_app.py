@@ -29,4 +29,4 @@ def create_app():
 # Main entry point for the application
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5003)
