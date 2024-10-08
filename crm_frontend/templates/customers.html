@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customers - CRM</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/crm_frontend/css/styles.css"> <!-- Updated path -->
 </head>
 <body>
     <header>
@@ -20,7 +20,10 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
-                    <th>Action</th>
+                    <th>Phone</th>
+                    <th>Company</th>
+                    <th>Address</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="customers-table">
@@ -28,26 +31,50 @@
             </tbody>
         </table>
 
-        <h3>Add New Customer</h3>
+        <h3 id="form-title">Add New Customer</h3>
         <form id="customer-form">
+            <input type="hidden" id="customer_id">
             <input type="text" id="first_name" placeholder="First Name" required>
             <input type="text" id="last_name" placeholder="Last Name" required>
             <input type="email" id="email" placeholder="Email" required>
             <input type="text" id="phone" placeholder="Phone">
             <input type="text" id="company" placeholder="Company">
             <input type="text" id="address" placeholder="Address">
-            <button type="submit">Add Customer</button>
+            <button type="submit" id="form-submit-btn">Add Customer</button>
         </form>
     </div>
+
     <script>
-        fetchData('/customers', 'customers-table');
+        // Fetch and display customers
+        function fetchData(url, tableId) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById(tableId);
+                    tableBody.innerHTML = '';
+                    data.forEach(customer => {
+                        const row = `
+                            <tr>
+                                <td>${customer.id}</td>
+                                <td>${customer.first_name}</td>
+                                <td>${customer.last_name}</td>
+                                <td>${customer.email}</td>
+                                <td>${customer.phone}</td>
+                                <td>${customer.company}</td>
+                                <td>${customer.address}</td>
+                                <td>
+                                    <button onclick="editCustomer(${customer.id})">Edit</button>
+                                    <button onclick="deleteCustomer(${customer.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error fetching customers:', error));
+        }
 
-        // Add event listener for the form
-        document.getElementById('customer-form').addEventListener('submit', function (event) {
-            event.preventDefault();
-            addCustomer();
-        });
-
+        // Add a new customer
         function addCustomer() {
             const data = {
                 first_name: document.getElementById('first_name').value,
@@ -60,21 +87,112 @@
 
             fetch('/customers', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 alert('Customer added successfully!');
                 fetchData('/customers', 'customers-table'); // Refresh the table
+                resetForm(); // Clear the form after adding
             })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            .catch(error => console.error('Error adding customer:', error));
         }
+
+        // Edit customer (populate the form with customer data)
+        function editCustomer(customerId) {
+            fetch(`/customers/${customerId}`)
+                .then(response => response.json())
+                .then(customer => {
+                    document.getElementById('customer_id').value = customer.id;
+                    document.getElementById('first_name').value = customer.first_name;
+                    document.getElementById('last_name').value = customer.last_name;
+                    document.getElementById('email').value = customer.email;
+                    document.getElementById('phone').value = customer.phone;
+                    document.getElementById('company').value = customer.company;
+                    document.getElementById('address').value = customer.address;
+                    document.getElementById('form-title').innerText = 'Edit Customer';
+                    document.getElementById('form-submit-btn').innerText = 'Update Customer';
+                })
+                .catch(error => console.error('Error fetching customer:', error));
+        }
+
+        // Update a customer
+        function updateCustomer(customerId) {
+            const data = {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                address: document.getElementById('address').value
+            };
+
+            fetch(`/customers/${customerId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Customer updated successfully!');
+                fetchData('/customers', 'customers-table'); // Refresh the table
+                resetForm(); // Clear form after update
+            })
+            .catch(error => console.error('Error updating customer:', error));
+        }
+
+        // Delete a customer
+        function deleteCustomer(customerId) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                fetch(`/customers/${customerId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        alert('Customer deleted successfully!');
+                        fetchData('/customers', 'customers-table'); // Refresh the table
+                    })
+                    .catch(error => console.error('Error deleting customer:', error));
+            }
+        }
+
+        // Reset the form to add new customer mode
+        function resetForm() {
+            document.getElementById('customer_id').value = '';
+            document.getElementById('first_name').value = '';
+            document.getElementById('last_name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('company').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('form-title').innerText = 'Add New Customer';
+            document.getElementById('form-submit-btn').innerText = 'Add Customer';
+        }
+
+        // Initialize data fetching
+        fetchData('/customers', 'customers-table');
+
+        // Add event listener for the form (used for both add and update)
+        document.getElementById('customer-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const customerId = document.getElementById('customer_id').value;
+            if (customerId) {
+                updateCustomer(customerId);
+            } else {
+                addCustomer();
+            }
+        });
     </script>
-    <script src="/js/scripts.js"></script>
 </body>
 </html>

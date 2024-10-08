@@ -1,4 +1,4 @@
-from crm_backend import db
+from crm_backend.backend_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Customer(db.Model):
@@ -13,11 +13,13 @@ class Customer(db.Model):
     company = db.Column(db.String(100))
     address = db.Column(db.String(200))
 
-    # Establish relationships to related entities (optional but useful)
-    sales_leads = db.relationship('SalesLead', backref='customer', lazy=True)
-    interactions = db.relationship('Interaction', backref='customer', lazy=True)
-    support_tickets = db.relationship('SupportTicket', backref='customer', lazy=True)
+    # Relationships
+    sales_leads = db.relationship('SalesLead', backref='customer', lazy=True, cascade="all, delete-orphan")
+    interactions = db.relationship('Interaction', backref='customer', lazy=True, cascade="all, delete-orphan")
+    support_tickets = db.relationship('SupportTicket', backref='customer', lazy=True, cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<Customer {self.first_name} {self.last_name}>"
 
 class Worker(db.Model):
     __tablename__ = 'workers'
@@ -35,6 +37,8 @@ class Worker(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def __repr__(self):
+        return f"<Worker {self.name}, Position: {self.position}>"
 
 class SalesLead(db.Model):
     __tablename__ = 'sales_leads'
@@ -44,6 +48,8 @@ class SalesLead(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     status = db.Column(db.String(50))
 
+    def __repr__(self):
+        return f"<SalesLead ID: {self.id}, Status: {self.status}>"
 
 class Interaction(db.Model):
     __tablename__ = 'interactions'
@@ -53,6 +59,8 @@ class Interaction(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     notes = db.Column(db.Text)
 
+    def __repr__(self):
+        return f"<Interaction ID: {self.id}>"
 
 class SupportTicket(db.Model):
     __tablename__ = 'support_tickets'
@@ -63,6 +71,8 @@ class SupportTicket(db.Model):
     description = db.Column(db.Text)
     status = db.Column(db.String(50))
 
+    def __repr__(self):
+        return f"<SupportTicket ID: {self.id}, Status: {self.status}>"
 
 class Analytics(db.Model):
     __tablename__ = 'analytics'
@@ -70,3 +80,6 @@ class Analytics(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Analytics ID: {self.id}>"
