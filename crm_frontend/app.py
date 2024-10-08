@@ -1,9 +1,17 @@
 from flask import Flask, request, jsonify, render_template
+from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = Flask(__name__)
 
-# Dummy user data for demonstration
-users = {'testuser': 'password123','Aroosha': '123'}
+# Set a secret key for the application (could be loaded from environment variables)
+app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
+
+# Dummy user data with hashed passwords for demonstration
+users = {
+    'testuser': generate_password_hash('password123'),
+    'Aroosha': generate_password_hash('123')
+}
 
 # Routes to render HTML pages
 @app.route('/')
@@ -42,13 +50,14 @@ def analytics():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    print(data)
     username = data.get('username')
     password = data.get('password')
 
     # Simple authentication logic
-    if username in users and users[username] == password:
+    if username in users and check_password_hash(users[username], password):
+        # Generate a token here using JWT if applicable
         return jsonify({'token': 'dummy_token', 'username': username}), 200
+
     return jsonify({'error': 'Invalid credentials'}), 401
 
 if __name__ == '__main__':

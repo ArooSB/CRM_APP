@@ -4,7 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - CRM</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logout-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        nav {
+            margin: 20px 0;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #0056b3;
+        }
+
+        nav a.active {
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -22,6 +91,9 @@
             <a href="/analytics">Analytics</a>
         </nav>
     </div>
+    <footer>
+        <p>&copy; 2024 CRM System</p>
+    </footer>
     <script>
         function logout() {
             localStorage.removeItem('token');
@@ -34,6 +106,7 @@
             if (userName) {
                 const welcomeMessage = document.createElement('p');
                 welcomeMessage.innerText = `Welcome, ${userName}!`;
+                welcomeMessage.style.fontSize = '1.2em';
                 document.querySelector('.container').appendChild(welcomeMessage);
             }
 
@@ -46,6 +119,5 @@
             });
         });
     </script>
-    <script src="/js/scripts.js"></script>
 </body>
 </html>
