@@ -1,32 +1,33 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-from flask_migrate import Migrate
-from crm_backend.config import Config
 
-# Initialize extensions
-db = SQLAlchemy()
+from flask import Flask
+from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
+from crm_backend.config import Config
+from crm_backend.db import db  # Import db from db.py
+from crm_backend.config import get_config
+
+# Initialize other extensions
 migrate = Migrate()
 jwt = JWTManager()
 
 def create_app():
-    """Create and configure the Flask application."""
-    # Initialize the Flask application
     app = Flask(__name__)
     app.config.from_object(Config)
 
     # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
-    jwt.init_app(app)
+    db.init_app(app)  # Initialize db
+    migrate.init_app(app, db)  # Initialize migrations
+    jwt.init_app(app)  # Initialize JWT
 
-    # Register blueprints
+    # Register blueprints for routes
     from crm_backend.routes import register_blueprints
     register_blueprints(app)
 
     return app
 
-# Main entry point for the application
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5003)
+    try:
+        app.run(debug=True, port=5003)
+    except Exception as e:
+        print(f"Error starting the application: {str(e)}")

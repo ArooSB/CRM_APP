@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from crm_backend.backend_app import db
 from crm_backend.models import SalesLead, Customer
 from flask_jwt_extended import jwt_required
+from datetime import datetime
 
 bp = Blueprint('sales_leads', __name__, url_prefix='/sales_leads')
 
@@ -70,8 +71,13 @@ def create_sales_lead():
         customer_id=data['customer_id'],
         status=data['status']
     )
-    db.session.add(sales_lead)
-    db.session.commit()
+
+    try:
+        db.session.add(sales_lead)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error creating sales lead', 'error': str(e)}), 500
 
     return jsonify({'id': sales_lead.id, 'message': 'Sales lead created successfully'}), 201
 
@@ -82,9 +88,15 @@ def update_sales_lead(id):
     sales_lead = SalesLead.query.get_or_404(id)
     data = request.get_json()
 
-    # Update status field only if provided
-    sales_lead.status = data.get('status', sales_lead.status)
-    db.session.commit()
+    # Update fields only if provided
+    if 'status' in data:
+        sales_lead.status = data['status']
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error updating sales lead', 'error': str(e)}), 500
 
     return jsonify({'message': 'Sales lead updated successfully'})
 
@@ -93,7 +105,17 @@ def update_sales_lead(id):
 @jwt_required()
 def delete_sales_lead(id):
     sales_lead = SalesLead.query.get_or_404(id)
-    db.session.delete(sales_lead)
-    db.session.commit()
+
+    try:
+        db.session.delete(sales_lead)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error deleting sales lead', 'error': str(e)}), 500
 
     return jsonify({'message': 'Sales lead deleted successfully'})
+
+# Register the Blueprint
+def register_routes(app):
+    app.register_blueprint(bp)
+s

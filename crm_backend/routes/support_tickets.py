@@ -73,8 +73,13 @@ def create_support_ticket():
         description=data['description'],
         status=data['status']
     )
-    db.session.add(support_ticket)
-    db.session.commit()
+
+    try:
+        db.session.add(support_ticket)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error creating support ticket', 'error': str(e)}), 500
 
     return jsonify({'id': support_ticket.id, 'message': 'Support ticket created successfully'}), 201
 
@@ -86,9 +91,16 @@ def update_support_ticket(id):
     data = request.get_json()
 
     # Update fields only if provided
-    support_ticket.description = data.get('description', support_ticket.description)
-    support_ticket.status = data.get('status', support_ticket.status)
-    db.session.commit()
+    if 'description' in data:
+        support_ticket.description = data['description']
+    if 'status' in data:
+        support_ticket.status = data['status']
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error updating support ticket', 'error': str(e)}), 500
 
     return jsonify({'message': 'Support ticket updated successfully'})
 
@@ -97,7 +109,16 @@ def update_support_ticket(id):
 @jwt_required()
 def delete_support_ticket(id):
     support_ticket = SupportTicket.query.get_or_404(id)
-    db.session.delete(support_ticket)
-    db.session.commit()
+
+    try:
+        db.session.delete(support_ticket)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error deleting support ticket', 'error': str(e)}), 500
 
     return jsonify({'message': 'Support ticket deleted successfully'})
+
+# Register the Blueprint
+def register_routes(app):
+    app.register_blueprint(bp)

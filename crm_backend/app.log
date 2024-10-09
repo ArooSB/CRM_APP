@@ -1,0 +1,95 @@
+2024-10-09 17:09:16,669 WARNING  * Debugger is active!
+2024-10-09 17:09:16,678 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:11:31,179 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:11:31,180 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:11:31,181 INFO  * Restarting with stat
+2024-10-09 17:11:31,592 WARNING  * Debugger is active!
+2024-10-09 17:11:31,598 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:11:45,078 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:11:45,078 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:11:45,079 INFO  * Restarting with stat
+2024-10-09 17:11:45,409 WARNING  * Debugger is active!
+2024-10-09 17:11:45,415 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:12:23,833 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/config.py', reloading
+2024-10-09 17:12:24,010 INFO  * Restarting with stat
+2024-10-09 17:12:24,394 WARNING  * Debugger is active!
+2024-10-09 17:12:24,399 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:12:27,859 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:12:27,859 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:12:27,859 INFO  * Restarting with stat
+2024-10-09 17:12:28,179 WARNING  * Debugger is active!
+2024-10-09 17:12:28,186 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:12:45,382 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/backend_app.py', reloading
+2024-10-09 17:12:45,505 INFO  * Restarting with stat
+2024-10-09 17:12:45,882 WARNING  * Debugger is active!
+2024-10-09 17:12:45,887 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:12:48,295 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:12:48,296 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:12:48,296 INFO  * Restarting with stat
+2024-10-09 17:12:48,595 WARNING  * Debugger is active!
+2024-10-09 17:12:48,601 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:13:31,092 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:13:31,093 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:13:31,096 INFO  * Restarting with stat
+2024-10-09 17:13:32,033 WARNING  * Debugger is active!
+2024-10-09 17:13:32,042 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:14:12,515 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:14:12,516 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:14:12,517 INFO  * Restarting with stat
+2024-10-09 17:14:12,924 WARNING  * Debugger is active!
+2024-10-09 17:14:12,932 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:14:36,063 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:14:36,063 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:14:36,064 INFO  * Restarting with stat
+2024-10-09 17:14:36,466 WARNING  * Debugger is active!
+2024-10-09 17:14:36,471 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:15:32,509 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:15:32,509 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:15:32,510 INFO  * Restarting with stat
+2024-10-09 17:15:33,036 WARNING  * Debugger is active!
+2024-10-09 17:15:33,046 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:16:40,819 INFO 127.0.0.1 - - [09/Oct/2024 17:16:40] "[33mGET / HTTP/1.1[0m" 404 -
+2024-10-09 17:16:41,045 INFO 127.0.0.1 - - [09/Oct/2024 17:16:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-10-09 17:16:50,176 INFO 127.0.0.1 - - [09/Oct/2024 17:16:50] "[33mGET /customers HTTP/1.1[0m" 404 -
+2024-10-09 17:20:51,291 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/test.py', reloading
+2024-10-09 17:20:51,485 INFO  * Restarting with stat
+2024-10-09 17:20:52,033 WARNING  * Debugger is active!
+2024-10-09 17:20:52,046 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:21:38,456 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5004
+ * Running on http://192.168.2.156:5004
+2024-10-09 17:21:38,456 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:21:38,457 INFO  * Restarting with stat
+2024-10-09 17:21:38,763 WARNING  * Debugger is active!
+2024-10-09 17:21:38,770 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:21:57,994 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/config.py', reloading
+2024-10-09 17:21:58,122 INFO  * Restarting with stat
+2024-10-09 17:21:58,581 WARNING  * Debugger is active!
+2024-10-09 17:21:58,588 INFO  * Debugger PIN: 405-876-994
+2024-10-09 17:24:36,316 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/backend_app.py', reloading
+2024-10-09 17:24:36,509 INFO  * Restarting with stat

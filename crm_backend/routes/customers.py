@@ -2,8 +2,16 @@ from flask import Blueprint, request, jsonify
 from crm_backend.backend_app import db
 from crm_backend.models import Customer
 from flask_jwt_extended import jwt_required
+import re
 
 bp = Blueprint('customers', __name__, url_prefix='/customers')
+
+
+# Validate email format
+def is_valid_email(email):
+    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    return re.match(email_regex, email) is not None
+
 
 # Get all customers with optional search and pagination
 @bp.route('/', methods=['GET'])
@@ -40,6 +48,7 @@ def get_customers():
         'current_page': customers.page
     })
 
+
 # Get a single customer by ID
 @bp.route('/<int:id>', methods=['GET'])
 @jwt_required()
@@ -55,6 +64,7 @@ def get_customer(id):
         'address': customer.address
     })
 
+
 # Create a new customer
 @bp.route('/', methods=['POST'])
 @jwt_required()
@@ -62,12 +72,19 @@ def create_customer():
     data = request.get_json()
 
     # Validate required fields
-    if not data.get('first_name') or not data.get('last_name') or not data.get('email'):
-        return jsonify({'message': 'Missing required fields: first_name, last_name, email'}), 400
+    if not data.get('first_name') or not data.get('last_name') or not data.get(
+            'email'):
+        return jsonify({
+                           'message': 'Missing required fields: first_name, last_name, email'}), 400
+
+    # Validate email format
+    if not is_valid_email(data['email']):
+        return jsonify({'message': 'Invalid email format'}), 400
 
     # Check for existing customer with the same email
     if Customer.query.filter_by(email=data['email']).first():
-        return jsonify({'message': 'Customer with this email already exists'}), 400
+        return jsonify(
+            {'message': 'Customer with this email already exists'}), 400
 
     customer = Customer(
         first_name=data['first_name'],
@@ -77,9 +94,18 @@ def create_customer():
         company=data.get('company'),
         address=data.get('address')
     )
-    db.session.add(customer)
-    db.session.commit()
-    return jsonify({'id': customer.id, 'message': 'Customer created successfully'}), 201
+
+    try:
+        db.session.add(customer)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {'message': 'Error creating customer', 'error': str(e)}), 500
+
+    return jsonify(
+        {'id': customer.id, 'message': 'Customer created successfully'}), 201
+
 
 # Update an existing customer
 @bp.route('/<int:id>', methods=['PUT'])
@@ -96,14 +122,28 @@ def update_customer(id):
     customer.company = data.get('company', customer.company)
     customer.address = data.get('address', customer.address)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {'message': 'Error updating customer', 'error': str(e)}), 500
+
     return jsonify({'message': 'Customer updated successfully'})
+
 
 # Delete a customer by ID
 @bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_customer(id):
     customer = Customer.query.get_or_404(id)
-    db.session.delete(customer)
-    db.session.commit()
+
+    try:
+        db.session.delete(customer)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {'message': 'Error deleting customer', 'error': str(e)}), 500
+
     return jsonify({'message': 'Customer deleted successfully'})

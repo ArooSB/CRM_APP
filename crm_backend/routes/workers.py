@@ -18,8 +18,13 @@ def register_worker():
 
     worker = Worker(username=username, role=role)
     worker.set_password(password)
-    db.session.add(worker)
-    db.session.commit()
+
+    try:
+        db.session.add(worker)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error registering worker', 'error': str(e)}), 500
 
     return jsonify({'message': 'Worker registered successfully'}), 201
 
@@ -37,7 +42,7 @@ def login_worker():
 
     return jsonify({'message': 'Invalid credentials'}), 401
 
-# Logout Worker (JWT token is handled in frontend by removing token)
+# Logout Worker
 @bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout_worker():
@@ -104,8 +109,14 @@ def create_worker():
         email=data['email'],
         position=data['position']
     )
-    db.session.add(worker)
-    db.session.commit()
+
+    try:
+        db.session.add(worker)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error creating worker', 'error': str(e)}), 500
+
     return jsonify({'id': worker.id, 'message': 'Worker created successfully'}), 201
 
 # Update an existing worker by ID
@@ -116,16 +127,24 @@ def update_worker(id):
     data = request.get_json()
 
     # Update fields only if provided
-    worker.name = data.get('name', worker.name)
-    worker.email = data.get('email', worker.email)
-    worker.position = data.get('position', worker.position)
+    if 'name' in data:
+        worker.name = data['name']
+    if 'email' in data:
+        worker.email = data['email']
+    if 'position' in data:
+        worker.position = data['position']
 
     # Check if the email is already taken by another worker
     existing_worker = Worker.query.filter(Worker.email == worker.email, Worker.id != worker.id).first()
     if existing_worker:
         return jsonify({'message': 'Worker with this email already exists'}), 409
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error updating worker', 'error': str(e)}), 500
+
     return jsonify({'message': 'Worker updated successfully'})
 
 # Delete a worker by ID
@@ -133,6 +152,16 @@ def update_worker(id):
 @jwt_required()
 def delete_worker(id):
     worker = Worker.query.get_or_404(id)
-    db.session.delete(worker)
-    db.session.commit()
+
+    try:
+        db.session.delete(worker)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error deleting worker', 'error': str(e)}), 500
+
     return jsonify({'message': 'Worker deleted successfully'})
+
+# Register the Blueprint
+def register_routes(app):
+    app.register_blueprint(bp)

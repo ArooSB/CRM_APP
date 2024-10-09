@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from crm_backend.backend_app import db
 from crm_backend.models import Interaction, Customer
 from flask_jwt_extended import jwt_required
+from datetime import datetime
 
 bp = Blueprint('interactions', __name__, url_prefix='/interactions')
 
@@ -20,8 +21,7 @@ def get_interactions():
     if customer_id:
         query = query.filter_by(customer_id=customer_id)
 
-    interactions = query.paginate(page=page, per_page=per_page,
-                                  error_out=False)
+    interactions = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify({
         'interactions': [{
@@ -57,8 +57,7 @@ def create_interaction():
 
     # Validate the required fields
     if not data.get('customer_id') or not data.get('notes'):
-        return jsonify(
-            {'message': 'Missing required fields: customer_id, notes'}), 400
+        return jsonify({'message': 'Missing required fields: customer_id, notes'}), 400
 
     # Check if the customer exists before creating the interaction
     customer = Customer.query.get(data['customer_id'])
@@ -67,10 +66,16 @@ def create_interaction():
 
     interaction = Interaction(
         customer_id=data['customer_id'],
-        notes=data['notes']
+        notes=data['notes'],
+        created_at=datetime.utcnow()  # Set the created_at field
     )
-    db.session.add(interaction)
-    db.session.commit()
+
+    try:
+        db.session.add(interaction)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error creating interaction', 'error': str(e)}), 500
 
     return jsonify({
         'id': interaction.id,
@@ -89,7 +94,11 @@ def update_interaction(id):
     if 'notes' in data:
         interaction.notes = data['notes']
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error updating interaction', 'error': str(e)}), 500
 
     return jsonify({'message': 'Interaction updated successfully'})
 
@@ -99,8 +108,13 @@ def update_interaction(id):
 @jwt_required()
 def delete_interaction(id):
     interaction = Interaction.query.get_or_404(id)
-    db.session.delete(interaction)
-    db.session.commit()
+
+    try:
+        db.session.delete(interaction)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error deleting interaction', 'error': str(e)}), 500
 
     return jsonify({'message': 'Interaction deleted successfully'})
 

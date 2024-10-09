@@ -1,4 +1,4 @@
-from crm_backend.backend_app import db
+from crm_backend.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Customer(db.Model):
@@ -21,24 +21,29 @@ class Customer(db.Model):
     def __repr__(self):
         return f"<Customer {self.first_name} {self.last_name}>"
 
+
 class Worker(db.Model):
     __tablename__ = 'workers'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     position = db.Column(db.String(100))
     password_hash = db.Column(db.String(128))  # Field to store hashed password
 
     def set_password(self, password):
+        """Hash and set the password."""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """Check the provided password against the stored hashed password."""
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f"<Worker {self.name}, Position: {self.position}>"
+        return f"<Worker {self.first_name} {self.last_name}, Position: {self.position}>"
+
 
 class SalesLead(db.Model):
     __tablename__ = 'sales_leads'

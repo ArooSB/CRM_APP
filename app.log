@@ -1,0 +1,24 @@
+2024-10-09 17:09:53,948 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.2.156:5002
+2024-10-09 17:09:53,949 INFO [33mPress CTRL+C to quit[0m
+2024-10-09 17:09:53,949 INFO  * Restarting with stat
+2024-10-09 17:09:54,196 WARNING  * Debugger is active!
+2024-10-09 17:09:54,203 INFO  * Debugger PIN: 874-798-235
+2024-10-09 17:11:30,857 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/backend_app.py', reloading
+2024-10-09 17:11:30,982 INFO  * Restarting with stat
+2024-10-09 17:11:31,495 WARNING  * Debugger is active!
+2024-10-09 17:11:31,502 INFO  * Debugger PIN: 874-798-235
+2024-10-09 17:12:23,330 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/config.py', reloading
+2024-10-09 17:12:23,402 INFO  * Restarting with stat
+2024-10-09 17:12:23,834 WARNING  * Debugger is active!
+2024-10-09 17:12:23,841 INFO  * Debugger PIN: 874-798-235
+2024-10-09 17:12:44,595 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/backend_app.py', reloading
+2024-10-09 17:12:44,672 INFO  * Restarting with stat
+2024-10-09 17:12:45,322 WARNING  * Debugger is active!
+2024-10-09 17:12:45,331 INFO  * Debugger PIN: 874-798-235
+2024-10-09 17:13:30,715 INFO  * Detected change in '/Users/arooshabasharat/PycharmProjects/crm-app/crm_backend/backend_app.py', reloading
+2024-10-09 17:13:30,808 INFO  * Restarting with stat
+2024-10-09 17:13:31,931 WARNING  * Debugger is active!
+2024-10-09 17:13:31,949 INFO  * Debugger PIN: 874-798-235
