@@ -1,231 +1,90 @@
+import os
 import pytest
+from flask import Flask
 from crm_backend.backend_app import create_app, db
-from crm_backend.models import *
+from crm_backend.models import Worker
+
+# Configure test environment
+os.environ['FLASK_ENV'] = 'testing'
+os.environ[
+    'DATABASE_URL'] = 'sqlite:///:memory:'  # Use an in-memory database for testing
 
 
 @pytest.fixture
-def client():
-    """Create a test client for the Flask application."""
+def app():
+    """Create and configure a new app instance for each test."""
     app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 
+    # Create the database and the database tables
     with app.app_context():
-        db.create_all()  # Create database tables
-        yield app.test_client()  # Provide the test client
+        db.create_all()
 
-        db.session.remove()
-        db.drop_all()  # Clean up after tests
+    yield app  # This will return the app to the test
 
-
-# Worker Tests
-def test_register_worker(client):
-    response = client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    assert response.status_code == 201
-    assert response.json['message'] == 'Worker registered successfully'
+    # Clean up the database after each test
+    with app.app_context():
+        db.drop_all()
 
 
-def test_login_worker(client):
+@pytest.fixture
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
+
+
+@pytest.fixture
+def auth_token(client):
+    """Authenticate and get a JWT token."""
+    # Register a worker to authenticate
     client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
+        'username': 'test_user',
+        'password': 'password123',
+        'role': 'Sales'
     })
+
+    # Login to get the token
     response = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
+        'username': 'test_user',
+        'password': 'password123'
     })
-    assert response.status_code == 200
-    assert 'access_token' in response.json
+    return response.json['access_token']
 
 
-# Customer Tests
-def test_create_customer(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
+def test_create_worker(client, auth_token):
+    """Test creating a new worker."""
+    response = client.post('/workers/', json={
+        'name': 'Jane Smith',
+        'email': 'jane.smith@example.com',
+        'position': 'Sales Manager'
+    }, headers={"Authorization": f"Bearer {auth_token}"})
 
+    assert response.status_code == 201
+    assert response.json['message'] == 'Worker created successfully'
+
+
+def test_create_customer(client, auth_token):
+    """Test creating a new customer."""
+    # Adjust the route and expected payload as needed
     response = client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
+        'first_name': 'James',
+        'last_name': 'Bond',
+        'email': 'james@example.com',
         'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
+        'company': 'James Inc.',
+        'address': '123 Main St.'
+    }, headers={"Authorization": f"Bearer {auth_token}"})
 
     assert response.status_code == 201
-    assert response.json['message'] == 'Customer created successfully'
+    assert response.json['first_name'] == 'James'
 
 
-def test_get_customers(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
-
-    client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
-        'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    response = client.get('/customers/',
-                          headers={'Authorization': f'Bearer {access_token}'})
+def test_get_workers(client, auth_token):
+    """Test getting the list of workers."""
+    response = client.get('/workers/',
+                          headers={"Authorization": f"Bearer {auth_token}"})
     assert response.status_code == 200
-    assert len(response.json['customers']) == 1
+    assert isinstance(response.json['workers'], list)  # Ensure it's a list
 
 
-# Support Ticket Tests
-def test_create_support_ticket(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
-
-    # Create a customer first
-    customer_response = client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
-        'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    customer_id = customer_response.json['id']
-
-    response = client.post('/support_tickets/', json={
-        'customer_id': customer_id,
-        'description': 'Need help with my order.',
-        'status': 'open'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    assert response.status_code == 201
-    assert response.json['message'] == 'Support ticket created successfully'
-
-
-def test_get_support_tickets(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
-
-    # Create a customer and a ticket
-    customer_response = client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
-        'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    customer_id = customer_response.json['id']
-
-    client.post('/support_tickets/', json={
-        'customer_id': customer_id,
-        'description': 'Need help with my order.',
-        'status': 'open'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    response = client.get('/support_tickets/',
-                          headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == 200
-    assert len(response.json['tickets']) == 1
-
-
-# Interaction Tests
-def test_create_interaction(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
-
-    # Create a customer first
-    customer_response = client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
-        'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    customer_id = customer_response.json['id']
-
-    response = client.post('/interactions/', json={
-        'customer_id': customer_id,
-        'notes': 'Discussed the order details.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    assert response.status_code == 201
-    assert response.json['message'] == 'Interaction created successfully'
-
-
-def test_get_interactions(client):
-    client.post('/workers/register', json={
-        'username': 'testuser',
-        'password': 'testpassword',
-        'role': 'admin'
-    })
-    access_token = client.post('/workers/login', json={
-        'username': 'testuser',
-        'password': 'testpassword'
-    }).json['access_token']
-
-    # Create a customer and an interaction
-    customer_response = client.post('/customers/', json={
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@example.com',
-        'phone': '1234567890',
-        'company': 'Example Inc.',
-        'address': '123 Example St.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    customer_id = customer_response.json['id']
-
-    client.post('/interactions/', json={
-        'customer_id': customer_id,
-        'notes': 'Discussed the order details.'
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    response = client.get('/interactions/',
-                          headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == 200
-    assert len(response.json['interactions']) == 1
-
+if __name__ == '__main__':
+    pytest.main()

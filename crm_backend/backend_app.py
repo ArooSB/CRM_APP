@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from crm_backend.config import Config
 from crm_backend.db import db  # Import db from db.py
-from crm_backend.config import get_config
+
 
 # Initialize other extensions
 migrate = Migrate()
@@ -28,6 +28,6 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     try:
-        app.run(debug=True, port=5003)
+        app.run(debug=True, port=5004)
     except Exception as e:
         print(f"Error starting the application: {str(e)}")
