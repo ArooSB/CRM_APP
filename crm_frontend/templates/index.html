@@ -3,117 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CRM</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #444;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        input[type="submit"] {
-            background: #5cb85c;
-            color: #fff;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        input[type="submit"]:hover {
-            background: #4cae4c;
-        }
-
-        .error {
-            color: red;
-            margin-top: 15px;
-        }
-    </style>
+    <title>CRM Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/scripts.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>CRM Login</h1>
+        <h1>CRM Dashboard</h1>
+        <nav>
+            <a href="/customers">Manage Customers</a>
+            <a href="/sales_leads">Manage Sales Leads</a>
+            <a href="/interactions">Manage Interactions</a>
+            <a href="/support_tickets">Manage Support Tickets</a>
+            <a href="/analytics">Analytics</a>
+            <a href="/workers">Manage Workers</a>
+        </nav>
     </header>
-    <div class="container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <label for="username">Username</label>
-            <input type="text" id="username" required>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
-
-            <input type="submit" value="Login">
-            <div class="error" id="error-message"></div>
-        </form>
-    </div>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            await login();
-        });
-
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('token', data.access_token); // Adjusting to access_token based on your backend
-                localStorage.setItem('userName', username);
-                window.location.href = '/welcome';
-            } else {
-                const errorData = await response.json();
-                errorMessage.textContent = errorData.message || 'Login failed! Please check your credentials.';
-            }
-        }
-    </script>
+    <main>
+        <h2>Welcome to the CRM System</h2>
+        <p>Navigate through the options to manage the CRM effectively.</p>
+    </main>
 </body>
 </html>

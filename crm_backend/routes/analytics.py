@@ -49,32 +49,34 @@ def delete_analytic(id):
     db.session.commit()
     return jsonify({'message': 'Analytics entry deleted successfully'})
 
-# Extended functionality: Filter analytics data by date range
-@bp.route('/filter', methods=['GET'])
+# General analytics endpoint: filter by date and aggregate
+@bp.route('/filter_aggregate', methods=['GET'])
 @jwt_required()
-def filter_analytics():
+def filter_and_aggregate_analytics():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    # Assuming your 'data' field contains structured data including a 'timestamp' field
-    analytics = Analytics.query.filter(Analytics.timestamp >= start_date, Analytics.timestamp <= end_date).all()
+    # Filter by date range if provided
+    query = Analytics.query
+    if start_date:
+        query = query.filter(Analytics.timestamp >= start_date)
+    if end_date:
+        query = query.filter(Analytics.timestamp <= end_date)
 
-    return jsonify([{'id': a.id, 'data': a.data} for a in analytics])
+    # Retrieve filtered analytics data
+    analytics = query.all()
 
-# Extended functionality: Aggregate analytics data (e.g., count, average, etc.)
-@bp.route('/aggregate', methods=['GET'])
-@jwt_required()
-def aggregate_analytics():
-    # Example: Count the total number of analytics entries
-    total_count = db.session.query(func.count(Analytics.id)).scalar()
+    # Aggregate on the filtered data
+    total_count = db.session.query(func.count(Analytics.id)).filter(Analytics.timestamp >= start_date, Analytics.timestamp <= end_date).scalar()
 
-    # Example: Aggregate data based on some criteria (e.g., sales figures, interaction data, etc.)
-    # Modify this depending on the structure of your 'data' field
-    total_value = db.session.query(func.sum(func.cast(Analytics.data['value'], db.Float))).scalar()
+    # Example aggregation based on a 'value' field in the 'data' (assuming JSON structure with numeric data)
+    # You can replace 'value' with whatever key you need from the 'data' field
+    total_value = db.session.query(func.sum(func.cast(Analytics.data['value'], db.Float))).filter(Analytics.timestamp >= start_date, Analytics.timestamp <= end_date).scalar()
 
     return jsonify({
         'total_count': total_count,
-        'total_value': total_value
+        'total_value': total_value,
+        'analytics': [{'id': a.id, 'data': a.data, 'timestamp': a.timestamp} for a in analytics]
     })
 
 # Extended functionality: Get the most recent analytics entries (for dashboard insights)

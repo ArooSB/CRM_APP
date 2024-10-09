@@ -3,257 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Management</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-
-        header {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-        }
-
-        h1 {
-            margin: 0;
-        }
-
-        nav {
-            margin-top: 10px;
-        }
-
-        nav a {
-            color: white;
-            margin-right: 15px;
-            text-decoration: none;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        main {
-            margin-top: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h2, h3 {
-            color: #333;
-        }
-
-        input[type="text"], input[type="date"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-
-        th {
-            background: #f0f0f0;
-        }
-
-        .action-buttons button {
-            margin-right: 5px;
-        }
-
-        #aggregate-results, #recent-results {
-            margin-top: 20px;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 4px;
-        }
-    </style>
+    <title>Customer Analytics</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/scripts.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>Analytics Management</h1>
+        <h1>Analytics</h1>
         <nav>
+            <a href="/">Dashboard</a>
             <a href="/customers">Manage Customers</a>
             <a href="/sales_leads">Manage Sales Leads</a>
             <a href="/interactions">Manage Interactions</a>
             <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/">Dashboard</a>
+            <a href="/workers">Manage Workers</a>
         </nav>
     </header>
 
     <main>
-        <h2>Analytics Entries</h2>
-
-        <div>
-            <h3>Create New Analytics Entry</h3>
-            <input type="text" id="new-analytics-data" placeholder="Enter analytics data" />
-            <button id="create-analytics">Create</button>
-        </div>
-
-        <div>
-            <h3>Filter Analytics by Date</h3>
-            <input type="date" id="start-date" />
-            <input type="date" id="end-date" />
-            <button id="filter-analytics">Filter</button>
-        </div>
-
-        <div>
-            <h3>Analytics List</h3>
-            <table id="analytics-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Data</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Entries will be populated here -->
-                </tbody>
-            </table>
-        </div>
-
-        <div>
-            <h3>Aggregate Analytics</h3>
-            <button id="aggregate-analytics">Get Total Count & Value</button>
-            <div id="aggregate-results"></div>
-        </div>
-
-        <div>
-            <h3>Recent Analytics</h3>
-            <button id="recent-analytics">Get Recent Entries</button>
-            <div id="recent-results"></div>
+        <h3>Customer Analytics Overview</h3>
+        <div id="analytics-data">
+            <!-- Analytics data visualization will be populated here -->
         </div>
     </main>
-
-    <script>
-        const analyticsTableBody = document.getElementById('analytics-table').querySelector('tbody');
-        const aggregateResultsDiv = document.getElementById('aggregate-results');
-        const recentResultsDiv = document.getElementById('recent-results');
-
-        async function fetchAnalytics() {
-            const response = await fetch('/analytics/');
-            const analytics = await response.json();
-            analyticsTableBody.innerHTML = ''; // Clear existing entries
-            analytics.forEach(entry => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${entry.id}</td>
-                    <td>${entry.data}</td>
-                    <td class="action-buttons">
-                        <button onclick="deleteAnalytics(${entry.id})">Delete</button>
-                        <button onclick="openUpdateForm(${entry.id}, '${entry.data}')">Update</button>
-                    </td>
-                `;
-                analyticsTableBody.appendChild(row);
-            });
-        }
-
-        async function createAnalytics() {
-            const data = document.getElementById('new-analytics-data').value;
-            const response = await fetch('/analytics/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data })
-            });
-            if (response.ok) {
-                fetchAnalytics(); // Refresh analytics list
-                document.getElementById('new-analytics-data').value = ''; // Clear input
-            }
-        }
-
-        async function deleteAnalytics(id) {
-            const response = await fetch(`/analytics/${id}`, {
-                method: 'DELETE'
-            });
-            if (response.ok) {
-                fetchAnalytics(); // Refresh analytics list
-            }
-        }
-
-        async function updateAnalytics(id, data) {
-            const response = await fetch(`/analytics/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data })
-            });
-            if (response.ok) {
-                fetchAnalytics(); // Refresh analytics list
-            }
-        }
-
-        async function filterAnalytics() {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            const response = await fetch(`/analytics/filter?start_date=${startDate}&end_date=${endDate}`);
-            const analytics = await response.json();
-            analyticsTableBody.innerHTML = ''; // Clear existing entries
-            analytics.forEach(entry => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${entry.id}</td>
-                    <td>${entry.data}</td>
-                    <td class="action-buttons">
-                        <button onclick="deleteAnalytics(${entry.id})">Delete</button>
-                        <button onclick="openUpdateForm(${entry.id}, '${entry.data}')">Update</button>
-                    </td>
-                `;
-                analyticsTableBody.appendChild(row);
-            });
-        }
-
-        async function aggregateAnalytics() {
-            const response = await fetch('/analytics/aggregate');
-            const result = await response.json();
-            aggregateResultsDiv.innerHTML = `Total Count: ${result.total_count}, Total Value: ${result.total_value}`;
-        }
-
-        async function getRecentAnalytics() {
-            const response = await fetch('/analytics/recent');
-            const recentEntries = await response.json();
-            recentResultsDiv.innerHTML = ''; // Clear previous results
-            recentEntries.forEach(entry => {
-                const div = document.createElement('div');
-                div.innerHTML = `ID: ${entry.id}, Data: ${entry.data}, Timestamp: ${entry.timestamp}`;
-                recentResultsDiv.appendChild(div);
-            });
-        }
-
-        document.getElementById('create-analytics').addEventListener('click', createAnalytics);
-        document.getElementById('filter-analytics').addEventListener('click', filterAnalytics);
-        document.getElementById('aggregate-analytics').addEventListener('click', aggregateAnalytics);
-        document.getElementById('recent-analytics').addEventListener('click', getRecentAnalytics);
-
-        fetchAnalytics(); // Load initial data
-    </script>
 </body>
 </html>

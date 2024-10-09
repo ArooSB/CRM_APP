@@ -3,90 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Management</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #343a40;
-            margin: 0;
-            padding: 20px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #007bff;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #dee2e6;
-        }
-        th {
-            background-color: #e9ecef;
-        }
-        .action-buttons button {
-            margin-right: 5px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group input {
-            padding: 10px;
-            width: calc(100% - 22px);
-            margin-right: 5px;
-        }
-        .form-group button {
-            padding: 10px 15px;
-        }
-        #search-form {
-            margin-bottom: 20px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+    <title>Manage Customers</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/scripts.js" defer></script>
 </head>
 <body>
     <header>
         <h1>Customer Management</h1>
         <nav>
-            <a href="/analytics">Manage Analytics</a>
+            <a href="/">Dashboard</a>
             <a href="/sales_leads">Manage Sales Leads</a>
             <a href="/interactions">Manage Interactions</a>
             <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/">Dashboard</a>
+            <a href="/analytics">Analytics</a>
+            <a href="/workers">Manage Workers</a>
         </nav>
     </header>
 
     <main>
         <div id="search-form">
-            <input type="text" id="search" placeholder="Search by name or email" />
+            <input type="text" id="search" placeholder="Search by name or email">
             <button id="search-button">Search</button>
         </div>
 
         <div class="form-group">
             <h3>Create New Customer</h3>
-            <input type="text" id="first-name" placeholder="First Name" required />
-            <input type="text" id="last-name" placeholder="Last Name" required />
-            <input type="email" id="email" placeholder="Email" required />
-            <input type="text" id="phone" placeholder="Phone" />
-            <input type="text" id="company" placeholder="Company" />
-            <input type="text" id="address" placeholder="Address" />
+            <input type="text" id="first-name" placeholder="First Name" required>
+            <input type="text" id="last-name" placeholder="Last Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone">
+            <input type="text" id="company" placeholder="Company">
+            <input type="text" id="address" placeholder="Address">
             <button id="create-customer">Create Customer</button>
         </div>
 
@@ -109,130 +56,5 @@
             </tbody>
         </table>
     </main>
-
-    <script>
-        const customersTableBody = document.getElementById('customers-table').querySelector('tbody');
-
-        async function fetchCustomers(searchTerm = '') {
-            const response = await fetch(`/customers/?search=${searchTerm}`);
-            const { customers } = await response.json();
-            customersTableBody.innerHTML = ''; // Clear existing entries
-            customers.forEach(customer => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${customer.id}</td>
-                    <td>${customer.first_name}</td>
-                    <td>${customer.last_name}</td>
-                    <td>${customer.email}</td>
-                    <td>${customer.phone}</td>
-                    <td>${customer.company}</td>
-                    <td>${customer.address}</td>
-                    <td class="action-buttons">
-                        <button onclick="openUpdateForm(${customer.id}, '${customer.first_name}', '${customer.last_name}', '${customer.email}', '${customer.phone}', '${customer.company}', '${customer.address}')">Update</button>
-                        <button onclick="deleteCustomer(${customer.id})">Delete</button>
-                    </td>
-                `;
-                customersTableBody.appendChild(row);
-            });
-        }
-
-        async function createCustomer() {
-            const customerData = {
-                first_name: document.getElementById('first-name').value,
-                last_name: document.getElementById('last-name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                address: document.getElementById('address').value
-            };
-
-            const response = await fetch('/customers/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customerData)
-            });
-            if (response.ok) {
-                fetchCustomers(); // Refresh customer list
-                clearInputFields(); // Clear input fields
-            } else {
-                alert('Error creating customer.');
-            }
-        }
-
-        async function deleteCustomer(id) {
-            const response = await fetch(`/customers/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                fetchCustomers(); // Refresh customer list
-            } else {
-                alert('Error deleting customer.');
-            }
-        }
-
-        function openUpdateForm(id, firstName, lastName, email, phone, company, address) {
-            const customerData = {
-                id,
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                phone,
-                company,
-                address
-            };
-            populateUpdateForm(customerData);
-        }
-
-        function populateUpdateForm(customerData) {
-            document.getElementById('first-name').value = customerData.first_name;
-            document.getElementById('last-name').value = customerData.last_name;
-            document.getElementById('email').value = customerData.email;
-            document.getElementById('phone').value = customerData.phone;
-            document.getElementById('company').value = customerData.company;
-            document.getElementById('address').value = customerData.address;
-            document.getElementById('create-customer').innerText = 'Update Customer';
-            document.getElementById('create-customer').onclick = () => updateCustomer(customerData.id);
-        }
-
-        async function updateCustomer(id) {
-            const customerData = {
-                first_name: document.getElementById('first-name').value,
-                last_name: document.getElementById('last-name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                address: document.getElementById('address').value
-            };
-
-            const response = await fetch(`/customers/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customerData)
-            });
-            if (response.ok) {
-                fetchCustomers(); // Refresh customer list
-                clearInputFields(); // Clear input fields
-                document.getElementById('create-customer').innerText = 'Create Customer';
-                document.getElementById('create-customer').onclick = createCustomer;
-            } else {
-                alert('Error updating customer.');
-            }
-        }
-
-        function clearInputFields() {
-            document.getElementById('first-name').value = '';
-            document.getElementById('last-name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('company').value = '';
-            document.getElementById('address').value = '';
-        }
-
-        document.getElementById('create-customer').addEventListener('click', createCustomer);
-        document.getElementById('search-button').addEventListener('click', () => {
-            const searchTerm = document.getElementById('search').value;
-            fetchCustomers(searchTerm); // Search customers
-        });
-
-        fetchCustomers(); // Load initial data
-    </script>
 </body>
 </html>
