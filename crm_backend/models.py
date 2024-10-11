@@ -2,6 +2,8 @@ from crm_backend.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Customer(db.Model):
+    """Model representing a customer in the database."""
+
     __tablename__ = 'customers'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -19,10 +21,12 @@ class Customer(db.Model):
     support_tickets = db.relationship('SupportTicket', backref='customer', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
+        """Return a string representation of the customer."""
         return f"<Customer {self.first_name} {self.last_name}>"
 
-
 class Worker(db.Model):
+    """Model representing a worker in the database."""
+
     __tablename__ = 'workers'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -34,18 +38,31 @@ class Worker(db.Model):
     password_hash = db.Column(db.String(128))  # Field to store hashed password
 
     def set_password(self, password):
-        """Hash and set the password."""
+        """Hash and set the password.
+
+        Args:
+            password (str): The password to hash and store.
+        """
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """Check the provided password against the stored hashed password."""
+        """Check the provided password against the stored hashed password.
+
+        Args:
+            password (str): The password to check.
+
+        Returns:
+            bool: True if the password matches, False otherwise.
+        """
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
+        """Return a string representation of the worker."""
         return f"<Worker {self.first_name} {self.last_name}, Position: {self.position}>"
 
-
 class SalesLead(db.Model):
+    """Model representing a sales lead in the database."""
+
     __tablename__ = 'sales_leads'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -54,9 +71,12 @@ class SalesLead(db.Model):
     status = db.Column(db.String(50))
 
     def __repr__(self):
+        """Return a string representation of the sales lead."""
         return f"<SalesLead ID: {self.id}, Status: {self.status}>"
 
 class Interaction(db.Model):
+    """Model representing an interaction in the database."""
+
     __tablename__ = 'interactions'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -65,9 +85,12 @@ class Interaction(db.Model):
     notes = db.Column(db.Text)
 
     def __repr__(self):
+        """Return a string representation of the interaction."""
         return f"<Interaction ID: {self.id}>"
 
 class SupportTicket(db.Model):
+    """Model representing a support ticket in the database."""
+
     __tablename__ = 'support_tickets'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -77,9 +100,12 @@ class SupportTicket(db.Model):
     status = db.Column(db.String(50))
 
     def __repr__(self):
+        """Return a string representation of the support ticket."""
         return f"<SupportTicket ID: {self.id}, Status: {self.status}>"
 
 class Analytics(db.Model):
+    """Model representing analytics data in the database."""
+
     __tablename__ = 'analytics'
     __table_args__ = {'extend_existing': True}  # Allow redefining the table
 
@@ -87,4 +113,5 @@ class Analytics(db.Model):
     data = db.Column(db.Text)
 
     def __repr__(self):
+        """Return a string representation of the analytics data."""
         return f"<Analytics ID: {self.id}>"

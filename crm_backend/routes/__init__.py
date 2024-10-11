@@ -1,4 +1,3 @@
-
 from flask import Blueprint
 
 # Define blueprints for each route
