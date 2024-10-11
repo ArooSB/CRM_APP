@@ -4,48 +4,247 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Support Tickets</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e2e2e2;
+        }
+
+        .button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #218838;
+        }
+
+        .form-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section input, .form-section select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-section button {
+            width: 100%;
+        }
+    </style>
+    <script>
+        const apiUrl = '/support_tickets/';
+
+        // Function to fetch and display support tickets
+        async function fetchSupportTickets() {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            const ticketsTableBody = document.getElementById('ticketsTableBody');
+            ticketsTableBody.innerHTML = '';
+
+            data.support_tickets.forEach(ticket => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${ticket.id}</td>
+                    <td>${ticket.customer_id}</td>
+                    <td>${ticket.description}</td>
+                    <td>${ticket.status}</td>
+                    <td>${ticket.created_at}</td>
+                    <td>
+                        <button onclick="editTicket(${ticket.id})">Edit</button>
+                        <button onclick="deleteTicket(${ticket.id})">Delete</button>
+                    </td>
+                `;
+                ticketsTableBody.appendChild(row);
+            });
+        }
+
+        // Function to create a new support ticket
+        async function createSupportTicket(event) {
+            event.preventDefault();
+            const formData = new FormData(document.getElementById('createTicketForm'));
+            const data = {
+                customer_id: formData.get('customer_id'),
+                description: formData.get('description'),
+                status: formData.get('status'),
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming you store your JWT token in localStorage
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Support ticket created successfully!');
+                fetchSupportTickets();
+                document.getElementById('createTicketForm').reset();
+            } else {
+                alert('Failed to create ticket.');
+            }
+        }
+
+        // Function to delete a support ticket
+        async function deleteTicket(id) {
+            const response = await fetch(`${apiUrl}${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming you store your JWT token in localStorage
+                },
+            });
+
+            if (response.ok) {
+                alert('Support ticket deleted successfully!');
+                fetchSupportTickets();
+            } else {
+                alert('Failed to delete ticket.');
+            }
+        }
+
+        // Function to populate the edit form with ticket data
+        async function editTicket(id) {
+            const response = await fetch(`${apiUrl}${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming you store your JWT token in localStorage
+                },
+            });
+            const ticket = await response.json();
+            document.getElementById('editTicketId').value = ticket.id;
+            document.getElementById('editCustomerId').value = ticket.customer_id;
+            document.getElementById('editDescription').value = ticket.description;
+            document.getElementById('editStatus').value = ticket.status;
+            document.getElementById('editTicketForm').style.display = 'block';
+        }
+
+        // Function to update an existing support ticket
+        async function updateSupportTicket(event) {
+            event.preventDefault();
+            const formData = new FormData(document.getElementById('editTicketForm'));
+            const id = formData.get('id');
+            const data = {
+                description: formData.get('description'),
+                status: formData.get('status'),
+            };
+
+            const response = await fetch(`${apiUrl}${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming you store your JWT token in localStorage
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Support ticket updated successfully!');
+                fetchSupportTickets();
+                document.getElementById('editTicketForm').reset();
+                document.getElementById('editTicketForm').style.display = 'none';
+            } else {
+                alert('Failed to update ticket.');
+            }
+        }
+
+        // Initialize the page by fetching tickets
+        window.onload = fetchSupportTickets;
+    </script>
 </head>
 <body>
     <header>
-        <h1>Support Tickets</h1>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/customers">Manage Customers</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/workers">Manage Workers</a>
-        </nav>
+        <h1>Manage Support Tickets</h1>
     </header>
-
     <main>
-        <div class="form-group">
-            <h3>Create New Support Ticket</h3>
-            <input type="text" id="customer-id" placeholder="Customer ID" required>
-            <textarea id="ticket-description" placeholder="Describe the issue" required></textarea>
-            <select id="ticket-status">
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Closed">Closed</option>
-            </select>
-            <button id="create-ticket">Create Ticket</button>
+        <div class="form-section">
+            <h2>Create Support Ticket</h2>
+            <form id="createTicketForm" onsubmit="createSupportTicket(event)">
+                <input type="number" name="customer_id" placeholder="Customer ID" required>
+                <input type="text" name="description" placeholder="Description" required>
+                <select name="status" required>
+                    <option value="" disabled selected>Select Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <button type="submit">Create Ticket</button>
+            </form>
         </div>
 
-        <h3>Support Tickets List</h3>
-        <table id="tickets-table">
+        <div class="form-section" style="display: none;" id="editTicketForm">
+            <h2>Edit Support Ticket</h2>
+            <form onsubmit="updateSupportTicket(event)">
+                <input type="hidden" id="editTicketId" name="id">
+                <input type="number" id="editCustomerId" name="customer_id" placeholder="Customer ID" required readonly>
+                <input type="text" id="editDescription" name="description" placeholder="Description" required>
+                <select id="editStatus" name="status" required>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <button type="submit">Update Ticket</button>
+            </form>
+        </div>
+
+        <h2>Support Tickets</h2>
+        <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Customer ID</th>
                     <th>Description</th>
                     <th>Status</th>
+                    <th>Created At</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Entries will be populated here -->
+            <tbody id="ticketsTableBody">
+                <!-- Tickets will be dynamically inserted here -->
             </tbody>
         </table>
     </main>

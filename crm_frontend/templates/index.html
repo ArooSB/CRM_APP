@@ -3,26 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            top: 20px;
+        }
+
+        main {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+            margin-top: 60px; /* Adjusted margin to create space for header */
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-form input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .login-form button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-form button:hover {
+            background-color: #218838;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function handleLogin(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Invalid credentials');
+            })
+            .then(data => {
+                window.location.href = data.redirect;  // Redirect to the welcome page
+            })
+            .catch(error => {
+                document.getElementById('error-message').innerText = error.message; // Show error message
+            });
+        }
+    </script>
 </head>
 <body>
     <header>
-        <h1>CRM Dashboard</h1>
-        <nav>
-            <a href="/customers">Manage Customers</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/workers">Manage Workers</a>
-        </nav>
+        <h1>Welcome to the CRM</h1>
     </header>
 
     <main>
-        <h2>Welcome to the CRM System</h2>
-        <p>Navigate through the options to manage the CRM effectively.</p>
+        <p>Please log in to access the CRM features.</p>
+        <form class="login-form" onsubmit="handleLogin(event)">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <div id="error-message"></div> <!-- Error message placeholder -->
+        </form>
     </main>
+
+    <footer>
+        &copy; 2024 Your Company Name. All rights reserved.
+    </footer>
 </body>
 </html>

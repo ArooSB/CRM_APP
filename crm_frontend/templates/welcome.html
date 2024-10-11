@@ -3,26 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>CRM Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .welcome-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h2 {
+            color: #2c3e50;
+        }
+
+        .cta-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .cta-button:hover {
+            background-color: #218838;
+        }
+
+        .features-section {
+            margin-top: 20px;
+        }
+
+        .feature {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <script>
+        function redirectToDashboard() {
+            window.location.href = '/dashboard'; // Change the URL to your dashboard page
+        }
+    </script>
 </head>
 <body>
     <header>
-        <h1>Welcome to the CRM</h1>
+        <div class="logo">
+            <h1>CRM Dashboard</h1>
+        </div>
         <nav>
-            <a href="/">Dashboard</a>
-            <a href="/customers">Manage Customers</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/workers">Manage Workers</a>
+            <ul>
+                <li><a href="/customers">Manage Customers</a></li>
+                <li><a href="/sales_leads">Manage Sales Leads</a></li>
+                <li><a href="/interactions">Manage Interactions</a></li>
+                <li><a href="/support_tickets">Manage Support Tickets</a></li>
+                <li><a href="/analytics">Analytics</a></li>
+                <li><a href="/workers">Manage Workers</a></li>
+            </ul>
         </nav>
     </header>
 
     <main>
-        <p>Welcome, please explore the CRM features to manage your business effectively.</p>
+        <section class="welcome-section">
+            <h2>Welcome to the CRM System</h2>
+            <p>Your one-stop solution for managing customers, leads, interactions, and more!</p>
+            <button class="cta-button" onclick="redirectToDashboard()">Go to Dashboard</button>
+        </section>
+
+        <section class="features-section">
+            <h3>Features</h3>
+            <div class="feature">
+                <h4>Manage Customers</h4>
+                <p>Easily track and manage all customer information in one place.</p>
+            </div>
+            <div class="feature">
+                <h4>Sales Management</h4>
+                <p>Monitor your sales leads and convert them into satisfied customers.</p>
+            </div>
+            <div class="feature">
+                <h4>Support Tickets</h4>
+                <p>Efficiently handle customer support issues and track their resolution.</p>
+            </div>
+            <div class="feature">
+                <h4>Analytics</h4>
+                <p>Gain insights through detailed analytics to enhance business strategies.</p>
+            </div>
+        </section>
     </main>
+
+    <footer>
+        <p>&copy; 2024 Your CRM Company. All rights reserved.</p>
+    </footer>
 </body>
 </html>

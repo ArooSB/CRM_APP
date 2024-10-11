@@ -3,6 +3,10 @@ from crm_backend.backend_app import db
 from crm_backend.models import Interaction, Customer
 from flask_jwt_extended import jwt_required
 from datetime import datetime
+import logging
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
 
 bp = Blueprint('interactions', __name__, url_prefix='/interactions')
 
@@ -24,6 +28,10 @@ def get_interactions():
     customer_id = request.args.get('customer_id', type=int)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
+
+    # Limit maximum per_page value for performance
+    if per_page > 100:
+        per_page = 100
 
     query = Interaction.query
 
@@ -89,19 +97,21 @@ def create_interaction():
 
     interaction = Interaction(
         customer_id=data['customer_id'],
-        notes=data['notes'],
-        created_at=datetime.utcnow()
+        notes=data['notes']
+        # created_at is automatically handled by the model
     )
 
     try:
         db.session.add(interaction)
         db.session.commit()
     except Exception as e:
+        logging.error(f"Error creating interaction: {str(e)}")
         db.session.rollback()
-        return jsonify({'message': 'Error creating interaction', 'error': str(e)}), 500
+        return jsonify({'message': 'Error creating interaction'}), 500
 
     return jsonify({
         'id': interaction.id,
+        'created_at': interaction.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Include created_at
         'message': 'Interaction created successfully'
     }), 201
 
@@ -130,8 +140,9 @@ def update_interaction(id):
     try:
         db.session.commit()
     except Exception as e:
+        logging.error(f"Error updating interaction: {str(e)}")
         db.session.rollback()
-        return jsonify({'message': 'Error updating interaction', 'error': str(e)}), 500
+        return jsonify({'message': 'Error updating interaction'}), 500
 
     return jsonify({'message': 'Interaction updated successfully'})
 
@@ -154,8 +165,9 @@ def delete_interaction(id):
         db.session.delete(interaction)
         db.session.commit()
     except Exception as e:
+        logging.error(f"Error deleting interaction: {str(e)}")
         db.session.rollback()
-        return jsonify({'message': 'Error deleting interaction', 'error': str(e)}), 500
+        return jsonify({'message': 'Error deleting interaction'}), 500
 
     return jsonify({'message': 'Interaction deleted successfully'})
 

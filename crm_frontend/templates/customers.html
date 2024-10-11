@@ -3,42 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Customers</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>Customer Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>Customer Management</h1>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/workers">Manage Workers</a>
-        </nav>
-    </header>
 
-    <main>
-        <div id="search-form">
-            <input type="text" id="search" placeholder="Search by name or email">
-            <button id="search-button">Search</button>
+        <div class="form-container">
+            <h2 id="form-title">Add Customer</h2>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id" value="">
+                <input type="text" id="first-name" placeholder="First Name" required>
+                <input type="text" id="last-name" placeholder="Last Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="text" id="phone" placeholder="Phone">
+                <input type="text" id="company" placeholder="Company">
+                <textarea id="address" placeholder="Address"></textarea>
+                <button type="submit">Submit</button>
+            </form>
         </div>
 
-        <div class="form-group">
-            <h3>Create New Customer</h3>
-            <input type="text" id="first-name" placeholder="First Name" required>
-            <input type="text" id="last-name" placeholder="Last Name" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="text" id="phone" placeholder="Phone">
-            <input type="text" id="company" placeholder="Company">
-            <input type="text" id="address" placeholder="Address">
-            <button id="create-customer">Create Customer</button>
-        </div>
-
-        <h3>Customers List</h3>
-        <table id="customers-table">
+        <h2>Customer List</h2>
+        <input type="text" id="search" placeholder="Search customers" oninput="fetchCustomers()">
+        <table id="customer-table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -51,10 +108,156 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Entries will be populated here -->
-            </tbody>
+            <tbody id="customer-list"></tbody>
         </table>
-    </main>
+    </div>
+
+    <script>
+        const apiUrl = '/customers'; // Update this with your actual API endpoint
+
+        document.getElementById('customer-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const customerId = document.getElementById('customer-id').value;
+
+            if (customerId) {
+                updateCustomer(customerId);
+            } else {
+                createCustomer();
+            }
+        });
+
+        function createCustomer() {
+            const data = {
+                first_name: document.getElementById('first-name').value,
+                last_name: document.getElementById('last-name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                address: document.getElementById('address').value,
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure to use JWT for auth
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchCustomers();
+                resetForm();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateCustomer(id) {
+            const data = {
+                first_name: document.getElementById('first-name').value,
+                last_name: document.getElementById('last-name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                address: document.getElementById('address').value,
+            };
+
+            fetch(`${apiUrl}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchCustomers();
+                resetForm();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function fetchCustomers() {
+            const search = document.getElementById('search').value;
+
+            fetch(`${apiUrl}?search=${search}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const customerList = document.getElementById('customer-list');
+                customerList.innerHTML = '';
+
+                data.customers.forEach(customer => {
+                    const row = `
+                        <tr>
+                            <td>${customer.id}</td>
+                            <td>${customer.first_name}</td>
+                            <td>${customer.last_name}</td>
+                            <td>${customer.email}</td>
+                            <td>${customer.phone}</td>
+                            <td>${customer.company}</td>
+                            <td>${customer.address}</td>
+                            <td>
+                                <button onclick="editCustomer(${customer.id})">Edit</button>
+                                <button onclick="deleteCustomer(${customer.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    customerList.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function editCustomer(id) {
+            fetch(`${apiUrl}/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('customer-id').value = data.id;
+                document.getElementById('first-name').value = data.first_name;
+                document.getElementById('last-name').value = data.last_name;
+                document.getElementById('email').value = data.email;
+                document.getElementById('phone').value = data.phone;
+                document.getElementById('company').value = data.company;
+                document.getElementById('address').value = data.address;
+                document.getElementById('form-title').innerText = 'Edit Customer';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteCustomer(id) {
+            fetch(`${apiUrl}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchCustomers();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function resetForm() {
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-form').reset();
+            document.getElementById('form-title').innerText = 'Add Customer';
+        }
+
+        // Fetch customers on initial load
+        document.addEventListener('DOMContentLoaded', fetchCustomers);
+    </script>
 </body>
 </html>

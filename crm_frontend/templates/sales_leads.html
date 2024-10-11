@@ -3,49 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Sales Leads</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>Sales Lead Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .active {
+            background-color: #28a745; /* Green */
+        }
+
+        .deactivated {
+            background-color: #dc3545; /* Red */
+        }
+
+        .in-process {
+            background-color: #ffc107; /* Yellow */
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Sales Leads Management</h1>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/customers">Manage Customers</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/workers">Manage Workers</a>
-        </nav>
-    </header>
+    <div class="container">
+        <h1>Sales Lead Management</h1>
 
-    <main>
-        <div class="form-group">
-            <h3>Create New Sales Lead</h3>
-            <input type="text" id="customer-id" placeholder="Customer ID" required>
-            <select id="lead-status">
-                <option value="New">New</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Closed">Closed</option>
-            </select>
-            <button id="create-lead">Create Sales Lead</button>
+        <div class="form-container">
+            <h2 id="form-title">Add Sales Lead</h2>
+            <form id="sales-lead-form">
+                <input type="hidden" id="sales-lead-id" value="">
+                <input type="text" id="customer-id" placeholder="Customer ID" required>
+                <select id="status" required>
+                    <option value="" disabled selected>Select Status</option>
+                    <option value="active">Active</option>
+                    <option value="deactivated">Deactivated</option>
+                    <option value="in-process">In Process</option>
+                </select>
+                <input type="text" id="notes" placeholder="Notes" required>
+                <button type="submit">Submit</button>
+            </form>
         </div>
 
-        <h3>Sales Leads List</h3>
-        <table id="leads-table">
+        <h2>Sales Lead List</h2>
+        <input type="text" id="search" placeholder="Search sales leads" oninput="fetchSalesLeads()">
+        <table id="sales-lead-table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Customer ID</th>
                     <th>Status</th>
+                    <th>Notes</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Entries will be populated here -->
-            </tbody>
+            <tbody id="sales-lead-list"></tbody>
         </table>
-    </main>
+    </div>
+
+    <script>
+        const apiUrl = '/sales_leads'; // Update this with your actual API endpoint
+
+        document.getElementById('sales-lead-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const salesLeadId = document.getElementById('sales-lead-id').value;
+
+            if (salesLeadId) {
+                updateSalesLead(salesLeadId);
+            } else {
+                createSalesLead();
+            }
+        });
+
+        function createSalesLead() {
+            const data = {
+                customer_id: document.getElementById('customer-id').value,
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value,
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure to use JWT for auth
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchSalesLeads();
+                resetForm();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateSalesLead(id) {
+            const data = {
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value,
+            };
+
+            fetch(`${apiUrl}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchSalesLeads();
+                resetForm();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function fetchSalesLeads() {
+            const search = document.getElementById('search').value;
+
+            fetch(`${apiUrl}?search=${search}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const salesLeadList = document.getElementById('sales-lead-list');
+                salesLeadList.innerHTML = '';
+
+                data.salesLeads.forEach(salesLead => {
+                    const statusClass = salesLead.status.replace(' ', '-').toLowerCase();
+                    const row = `
+                        <tr>
+                            <td>${salesLead.id}</td>
+                            <td>${salesLead.customer_id}</td>
+                            <td>
+                                <span class="status-indicator ${statusClass}"></span>
+                                ${salesLead.status.charAt(0).toUpperCase() + salesLead.status.slice(1)}
+                            </td>
+                            <td>${salesLead.notes}</td>
+                            <td>
+                                <button onclick="editSalesLead(${salesLead.id})">Edit</button>
+                                <button onclick="deleteSalesLead(${salesLead.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    salesLeadList.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function editSalesLead(id) {
+            fetch(`${apiUrl}/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('sales-lead-id').value = data.id;
+                document.getElementById('customer-id').value = data.customer_id;
+                document.getElementById('status').value = data.status;
+                document.getElementById('notes').value = data.notes;
+                document.getElementById('form-title').innerText = 'Edit Sales Lead';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteSalesLead(id) {
+            fetch(`${apiUrl}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchSalesLeads();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function resetForm() {
+            document.getElementById('sales-lead-id').value = '';
+            document.getElementById('sales-lead-form').reset();
+            document.getElementById('form-title').innerText = 'Add Sales Lead';
+        }
+
+        // Fetch sales leads on initial load
+        document.addEventListener('DOMContentLoaded', fetchSalesLeads);
+    </script>
 </body>
 </html>

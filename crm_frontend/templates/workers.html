@@ -3,33 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Workers</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>Worker Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            padding: 10px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background: #218838;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        table th {
+            background: #f8f8f8;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>Worker Management</h1>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/customers">Manage Customers</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/analytics">Analytics</a>
-        </nav>
-    </header>
 
-    <main>
-        <div class="form-group">
-            <h3>Add New Worker</h3>
-            <input type="text" id="worker-name" placeholder="Name" required>
-            <input type="email" id="worker-email" placeholder="Email" required>
-            <input type="text" id="worker-position" placeholder="Position" required>
-            <button id="create-worker">Add Worker</button>
+        <div class="form-container">
+            <h2 id="form-title">Register Worker</h2>
+            <form id="worker-form">
+                <input type="hidden" id="worker-id" />
+                <input type="text" id="name" placeholder="Name" required />
+                <input type="email" id="email" placeholder="Email" required />
+                <input type="text" id="position" placeholder="Position" required />
+                <button type="submit">Register</button>
+            </form>
         </div>
 
-        <h3>Worker List</h3>
+        <h2>Workers List</h2>
         <table id="workers-table">
             <thead>
                 <tr>
@@ -40,10 +98,151 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Entries will be populated here -->
+            <tbody id="workers-body">
+                <!-- Worker rows will be inserted here -->
             </tbody>
         </table>
-    </main>
+    </div>
+
+    <script>
+        const form = document.getElementById('worker-form');
+        const workersBody = document.getElementById('workers-body');
+        const workerIdInput = document.getElementById('worker-id');
+        const formTitle = document.getElementById('form-title');
+
+        const API_URL = 'http://localhost:5000/workers'; // Adjust this based on your backend URL
+
+        document.addEventListener('DOMContentLoaded', fetchWorkers);
+
+        // Fetch workers from the backend
+        function fetchWorkers() {
+            fetch(API_URL, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                workersBody.innerHTML = '';
+                data.workers.forEach(worker => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${worker.id}</td>
+                        <td>${worker.name}</td>
+                        <td>${worker.email}</td>
+                        <td>${worker.position}</td>
+                        <td>
+                            <button onclick="editWorker(${worker.id})">Edit</button>
+                            <button onclick="deleteWorker(${worker.id})">Delete</button>
+                        </td>
+                    `;
+                    workersBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching workers:', error));
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = workerIdInput.value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const position = document.getElementById('position').value;
+
+            if (id) {
+                updateWorker(id, { name, email, position });
+            } else {
+                createWorker({ name, email, position });
+            }
+        });
+
+        // Create a new worker
+        function createWorker(worker) {
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(worker),
+            })
+            .then(response => {
+                if (response.ok) {
+                    fetchWorkers();
+                    form.reset();
+                } else {
+                    alert('Error creating worker');
+                }
+            })
+            .catch(error => console.error('Error creating worker:', error));
+        }
+
+        // Edit a worker
+        function editWorker(id) {
+            fetch(`${API_URL}/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                workerIdInput.value = data.id;
+                document.getElementById('name').value = data.name;
+                document.getElementById('email').value = data.email;
+                document.getElementById('position').value = data.position;
+                formTitle.textContent = 'Update Worker';
+            })
+            .catch(error => console.error('Error fetching worker:', error));
+        }
+
+        // Update a worker
+        function updateWorker(id, worker) {
+            fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(worker),
+            })
+            .then(response => {
+                if (response.ok) {
+                    fetchWorkers();
+                    form.reset();
+                    workerIdInput.value = '';
+                    formTitle.textContent = 'Register Worker';
+                } else {
+                    alert('Error updating worker');
+                }
+            })
+            .catch(error => console.error('Error updating worker:', error));
+        }
+
+        // Delete a worker
+        function deleteWorker(id) {
+            if (confirm('Are you sure you want to delete this worker?')) {
+                fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        fetchWorkers();
+                    } else {
+                        alert('Error deleting worker');
+                    }
+                })
+                .catch(error => console.error('Error deleting worker:', error));
+            }
+        }
+    </script>
 </body>
 </html>

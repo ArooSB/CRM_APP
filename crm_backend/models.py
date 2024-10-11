@@ -1,5 +1,6 @@
 from crm_backend.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 class Customer(db.Model):
     """Model representing a customer in the database."""
@@ -14,6 +15,7 @@ class Customer(db.Model):
     phone = db.Column(db.String(20))
     company = db.Column(db.String(100))
     address = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     # Relationships
     sales_leads = db.relationship('SalesLead', backref='customer', lazy=True, cascade="all, delete-orphan")
@@ -23,6 +25,7 @@ class Customer(db.Model):
     def __repr__(self):
         """Return a string representation of the customer."""
         return f"<Customer {self.first_name} {self.last_name}>"
+
 
 class Worker(db.Model):
     """Model representing a worker in the database."""
@@ -36,6 +39,7 @@ class Worker(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     position = db.Column(db.String(100))
     password_hash = db.Column(db.String(128))  # Field to store hashed password
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     def set_password(self, password):
         """Hash and set the password.
@@ -60,6 +64,7 @@ class Worker(db.Model):
         """Return a string representation of the worker."""
         return f"<Worker {self.first_name} {self.last_name}, Position: {self.position}>"
 
+
 class SalesLead(db.Model):
     """Model representing a sales lead in the database."""
 
@@ -69,10 +74,12 @@ class SalesLead(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     status = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     def __repr__(self):
         """Return a string representation of the sales lead."""
         return f"<SalesLead ID: {self.id}, Status: {self.status}>"
+
 
 class Interaction(db.Model):
     """Model representing an interaction in the database."""
@@ -83,10 +90,12 @@ class Interaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     def __repr__(self):
         """Return a string representation of the interaction."""
         return f"<Interaction ID: {self.id}>"
+
 
 class SupportTicket(db.Model):
     """Model representing a support ticket in the database."""
@@ -98,10 +107,12 @@ class SupportTicket(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     description = db.Column(db.Text)
     status = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     def __repr__(self):
         """Return a string representation of the support ticket."""
         return f"<SupportTicket ID: {self.id}, Status: {self.status}>"
+
 
 class Analytics(db.Model):
     """Model representing analytics data in the database."""
@@ -111,6 +122,7 @@ class Analytics(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Automatically set the creation date
 
     def __repr__(self):
         """Return a string representation of the analytics data."""

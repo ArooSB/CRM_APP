@@ -3,28 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Analytics</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/scripts.js" defer></script>
+    <title>Support Tickets Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        canvas {
+            margin: 20px 0;
+        }
+        .ticket-details {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .ticket-details h3 {
+            margin: 0 0 10px;
+        }
+        .ticket-details p {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Analytics</h1>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/customers">Manage Customers</a>
-            <a href="/sales_leads">Manage Sales Leads</a>
-            <a href="/interactions">Manage Interactions</a>
-            <a href="/support_tickets">Manage Support Tickets</a>
-            <a href="/workers">Manage Workers</a>
-        </nav>
-    </header>
+    <div class="container">
+        <h1>Support Tickets Status</h1>
+        <canvas id="ticketStatusChart" width="400" height="200"></canvas>
 
-    <main>
-        <h3>Customer Analytics Overview</h3>
-        <div id="analytics-data">
-            <!-- Analytics data visualization will be populated here -->
+        <div id="ticket-details" class="ticket-details" style="display: none;">
+            <h3>Ticket Details</h3>
+            <p><strong>Status:</strong> <span id="status"></span></p>
+            <p><strong>Description:</strong> <span id="description"></span></p>
+            <p><strong>Customer ID:</strong> <span id="customer-id"></span></p>
+            <p><strong>Created At:</strong> <span id="created-at"></span></p>
         </div>
-    </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Fetch support tickets' status data from the server
+        async function fetchTicketStatus() {
+            try {
+                const response = await fetch('/support_tickets/status', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                    }
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching ticket status:', error);
+            }
+        }
+
+        // Fetch support tickets by status from the server
+        async function fetchTicketsByStatus(status) {
+            try {
+                const response = await fetch(`/support_tickets?status=${status}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                    }
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching tickets by status:', error);
+            }
+        }
+
+        // Render the bar chart using Chart.js
+        async function renderChart() {
+            const statusData = await fetchTicketStatus();
+            const ctx = document.getElementById('ticketStatusChart').getContext('2d');
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Active', 'Deactivated', 'In Process'],
+                    datasets: [{
+                        label: '# of Tickets',
+                        data: [statusData.active, statusData.deactivated, statusData.inProcess],
+                        backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
+                        borderColor: ['#27ae60', '#c0392b', '#e67e22'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    onClick: async (e, elements) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const statusLabels = ['active', 'deactivated', 'in process'];
+                            const status = statusLabels[clickedIndex];
+
+                            const ticketDetails = await fetchTicketsByStatus(status);
+                            displayTicketDetails(ticketDetails.support_tickets[0]);  // Displaying the first ticket
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display ticket details in the details section
+        function displayTicketDetails(ticket) {
+            if (!ticket) {
+                alert('No tickets available for this status.');
+                return;
+            }
+
+            document.getElementById('status').textContent = ticket.status;
+            document.getElementById('description').textContent = ticket.description;
+            document.getElementById('customer-id').textContent = ticket.customer_id;
+            document.getElementById('created-at').textContent = ticket.created_at;
+
+            document.getElementById('ticket-details').style.display = 'block';
+        }
+
+        // Initialize the chart on page load
+        document.addEventListener('DOMContentLoaded', renderChart);
+    </script>
 </body>
 </html>
